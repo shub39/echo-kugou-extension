@@ -57,7 +57,6 @@ class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
         }
         val lyricsData = downloadSearchClient(candidate).getOrThrow()
         val syncedLyrics: MutableList<Lyrics.Item> = mutableListOf()
-        var previousTime: Long? = null
 
         for (line in lyricsData.lines()) {
             if (line.length < 10 || line[0] != '[' || !line[1].isDigit()) {
@@ -71,11 +70,10 @@ class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
                 Lyrics.Item(
                     text = split[1],
                     startTime = time,
-                    endTime = previousTime ?: Long.MAX_VALUE
+                    endTime = time
                 )
             )
 
-            previousTime = time
         }
 
         return lyrics.copy(
