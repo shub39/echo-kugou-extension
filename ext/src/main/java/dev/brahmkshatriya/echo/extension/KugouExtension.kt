@@ -66,13 +66,15 @@ class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
             val split: List<String> = line.split(']', limit = 2)
             val time: Long = parseTimeString(split[0].substring(1))
 
-            syncedLyrics.add(
-                Lyrics.Item(
-                    text = split[1],
-                    startTime = time,
-                    endTime = time
+            if (split[1].isNotBlank()) {
+                syncedLyrics.add(
+                    Lyrics.Item(
+                        text = split[1],
+                        startTime = time,
+                        endTime = time
+                    )
                 )
-            )
+            }
 
         }
 
