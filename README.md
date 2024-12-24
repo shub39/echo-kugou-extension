@@ -1,2 +1,3 @@
+![](kugou.png)
 # Kugou Lyrics Plugin for [Echo](https://github.com/brahmkshatriya/echo)
 bing chilling...

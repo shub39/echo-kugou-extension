@@ -79,7 +79,7 @@ class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
         }
 
         return lyrics.copy(
-            lyrics  = Lyrics.Timed(
+            lyrics = Lyrics.Timed(
                 list = syncedLyrics,
                 fillTimeGaps = true
             )
@@ -115,7 +115,8 @@ class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
             .url("https://krcs.kugou.com/download?ver=1&man=yes&client=pc&fmt=lrc&id=${candidate.id}&accesskey=${candidate.accesskey}")
             .build()
         val response = client.newCall(request).await()
-        val downloadResponse: KugouSearchCandidateDownloadResponse = json.decodeFromString(response.body.string())
+        val downloadResponse: KugouSearchCandidateDownloadResponse =
+            json.decodeFromString(response.body.string())
 
         val bytes: ByteArray = Base64.decode(downloadResponse.content)
         val decoder: CharsetDecoder = Charsets.forName(downloadResponse.charset).newDecoder()
@@ -140,7 +141,8 @@ class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
     }
 
     companion object {
-        const val SEARCH_BASE_URL = "https://mobileservice.kugou.com/api/v3/search/song?version=9108&plat=0&pagesize=8&showtype=0&keyword="
+        const val SEARCH_BASE_URL =
+            "https://mobileservice.kugou.com/api/v3/search/song?version=9108&plat=0&pagesize=8&showtype=0&keyword="
         const val LOAD_BASE_URL = "https://krcs.kugou.com/search?ver=1&man=yes&client=mobi&hash="
     }
 }
