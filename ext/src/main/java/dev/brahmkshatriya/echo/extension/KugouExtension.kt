@@ -69,7 +69,7 @@ class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
             if (split[1].isNotBlank()) {
                 syncedLyrics.add(
                     Lyrics.Item(
-                        text = split[1],
+                        text = split[1].trim(),
                         startTime = time,
                         endTime = time
                     )
