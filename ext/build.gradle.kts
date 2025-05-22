@@ -23,8 +23,9 @@ dependencies {
     compileOnly("com.github.brahmkshatriya:echo:$libVersion")
 
     testImplementation("junit:junit:4.13.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    implementation("io.ktor:ktor-utils:3.0.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation("com.github.brahmkshatriya:echo:$libVersion")
 }
 
