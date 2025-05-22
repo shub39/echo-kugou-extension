@@ -9,17 +9,13 @@ import dev.brahmkshatriya.echo.common.models.Lyrics
 import dev.brahmkshatriya.echo.common.models.Track
 import dev.brahmkshatriya.echo.common.settings.Setting
 import dev.brahmkshatriya.echo.common.settings.Settings
-import io.ktor.utils.io.charsets.CharsetDecoder
-import io.ktor.utils.io.charsets.decode
-import io.ktor.utils.io.charsets.forName
-import kotlinx.io.Buffer
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
+import java.nio.charset.StandardCharsets
+import java.util.Base64
 
-class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
+open class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
     private val client = OkHttpClient()
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -106,7 +102,6 @@ class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
         }
     }
 
-    @OptIn(ExperimentalEncodingApi::class)
     private suspend inline fun downloadSearchClient(
         candidate: KugouHashSearchResponse.Candidate
     ): Result<String> = runCatching {
@@ -115,11 +110,9 @@ class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
             .build()
         val response = client.newCall(request).await()
         val downloadResponse: KugouSearchCandidateDownloadResponse =
-            json.decodeFromString(response.body.string())
+            json.decodeFromString(response.body.string().also { println(it) })
 
-        val bytes: ByteArray = Base64.decode(downloadResponse.content)
-        val decoder: CharsetDecoder = Charsets.forName(downloadResponse.charset).newDecoder()
-        return@runCatching decoder.decode(Buffer().apply { write(bytes) })
+        return@runCatching decodeBASE64(downloadResponse.content)
     }
 
     private fun parseTimeString(string: String): Long {
@@ -137,6 +130,11 @@ class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
         }
 
         return time
+    }
+
+    @Suppress("NewApi")
+    open fun decodeBASE64(content: String): String {
+        return Base64.getDecoder().decode(content).toString(StandardCharsets.UTF_8)
     }
 
     companion object {
