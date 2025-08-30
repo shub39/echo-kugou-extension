@@ -4,7 +4,8 @@ import dev.brahmkshatriya.echo.common.clients.ExtensionClient
 import dev.brahmkshatriya.echo.common.clients.LyricsClient
 import dev.brahmkshatriya.echo.common.clients.LyricsSearchClient
 import dev.brahmkshatriya.echo.common.helpers.ContinuationCallback.Companion.await
-import dev.brahmkshatriya.echo.common.helpers.PagedData
+import dev.brahmkshatriya.echo.common.models.Feed
+import dev.brahmkshatriya.echo.common.models.Feed.Companion.toFeed
 import dev.brahmkshatriya.echo.common.models.Lyrics
 import dev.brahmkshatriya.echo.common.models.Track
 import dev.brahmkshatriya.echo.common.settings.Setting
@@ -21,22 +22,22 @@ open class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
 
     override suspend fun onExtensionSelected() {}
 
-    override val settingItems: List<Setting> = emptyList()
-
     private lateinit var setting: Settings
+    override suspend fun getSettingItems(): List<Setting> = emptyList()
+
     override fun setSettings(settings: Settings) {
         setting = settings
     }
 
-    override fun searchTrackLyrics(
+    override suspend fun searchTrackLyrics(
         clientId: String,
         track: Track
-    ): PagedData<Lyrics> = PagedData.Single {
+    ): Feed<Lyrics> {
         val request = Request.Builder()
             .url("$SEARCH_BASE_URL${track.title} - ${track.artists.firstOrNull()?.name ?: ""}")
             .build()
 
-        requestToLyrics(request)
+        return requestToLyrics(request)
     }
 
     override suspend fun loadLyrics(lyrics: Lyrics): Lyrics {
@@ -81,15 +82,7 @@ open class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
         )
     }
 
-    override fun searchLyrics(query: String): PagedData<Lyrics> = PagedData.Single {
-        val request = Request.Builder()
-            .url("$SEARCH_BASE_URL$query")
-            .build()
-
-        requestToLyrics(request)
-    }
-
-    private suspend inline fun requestToLyrics(request: Request): List<Lyrics> {
+    private suspend inline fun requestToLyrics(request: Request): Feed<Lyrics> {
         val response = client.newCall(request).await()
         val parsedResponse: KugouSearchResponse = json.decodeFromString(response.body.string())
 
@@ -99,7 +92,7 @@ open class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
                 title = it.songname,
                 subtitle = it.singername
             )
-        }
+        }.toFeed()
     }
 
     private suspend inline fun downloadSearchClient(
@@ -135,6 +128,14 @@ open class KugouExtension : ExtensionClient, LyricsClient, LyricsSearchClient {
     @Suppress("NewApi")
     open fun decodeBASE64(content: String): String {
         return Base64.getDecoder().decode(content).toString(StandardCharsets.UTF_8)
+    }
+
+    override suspend fun searchLyrics(query: String): Feed<Lyrics> {
+        val request = Request.Builder()
+            .url("$SEARCH_BASE_URL$query")
+            .build()
+
+        return requestToLyrics(request)
     }
 
     companion object {
